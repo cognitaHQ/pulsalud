@@ -1,0 +1,1 @@
+select r.name, i.name, e.declaredThisYear from eno AS e, regions as r, illness AS i WHERE r.id = e.regionId and e.illnessId = i.id and e.year = 2004 and e.week=20;
