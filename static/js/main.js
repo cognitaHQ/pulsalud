@@ -10,41 +10,35 @@ var chart1 = svg.append("g").attr("width", 120).attr("height", 200).attr("transf
 var chart2 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(100,400)");
 var g = svg.append("g");
 var mini = svg.append("g").attr("transform","translate(2400 0)").attr("width", 500).attr("height", 500);
-var color = d3.scale.category20c();//d3.scale.linear().domain([0,15]).range(['steelblue', 'orangered']);
+var color = function(i){
+  c = ["#000", "#d7191c", "#fdae61", "#ffffbf", "#abdda4", "#2b83ba" ];
+  //console.log(i)
+  return c[i];
+};//d3.scale.category20c();//d3.scale.linear().domain([0,15]).range(['steelblue', 'orangered']);
 var regiones = [];
- 
-d3.json("comunas.json", function(error, chile) {
+
+d3.tsv("/diabetes.csv", function(error, diabetes){
+
+var colorComunas = {}
+diabetes.forEach(function(item){
+  colorComunas[parseInt(item.codigo)] = parseInt(item.class);
+});
+d3.json("/js/comunas.json", function(error, chile) {
   var projection = d3.geo.mercator().scale(1200).translate([width*2 , -350]);
   var path = d3.geo.path().projection(projection);
 
   g.selectAll(".comunas")
      .data(topojson.feature(chile, chile.objects.comunas).features).enter().append("path")
       .attr("class", "region")
-      .attr("id", function(d){return d.properties.NOM_COM})
+      .attr("id", function(d){return d.properties.id})      
       .attr("data-region", function(d){if(regiones.indexOf(d.properties.NOM_REG) < 0){regiones.push(d.properties.NOM_REG)} return d.properties.NOM_REG})
-      .attr("d", path).style("stroke", "black").style("stroke-width", "0.5px").style("fill-opacity", 0.5).style("fill", function(d, i){return color(regiones.indexOf(d.properties.NOM_REG))})
+      .attr("d", path).style("stroke", "black").style("stroke-width", "0.5px").style("fill-opacity", 0.5).style("fill", function(d, i){if(colorComunas[d.properties.COD_COMUNA] == undefined){console.log(d.properties.COD_COMUNA)}return color(colorComunas[d.properties.COD_COMUNA])})
       .append("title").text(function(d){return d.properties.Details});
-  d3.selectAll(".region").on("mouseover", function(){
-    var region = (d3.select(this).attr("data-region"));
-    console.log(region);
-    var projectionMini = d3.geo.mercator().scale(2000).translate([800 , -500]);
-    var pathMini = d3.geo.path().projection(projectionMini);
-    
-    mini.selectAll(".region").remove()
-     .data(topojson.feature(chile, chile.objects.comunas).features      .filter(function(d){return d.properties.NOM_REG == region})
-).enter()
-      .append("path")
-      .attr("class", "region")
-      .attr("id", function(d){return d.properties.NOM_COM})
-      .attr("data-region", function(d){if(regiones.indexOf(d.properties.NOM_REG) < 0){regiones.push(d.properties.NOM_REG)} return d.properties.NOM_REG})
-      .attr("d", pathMini).style("stroke", "black").style("stroke-width", "0.5px").style("fill-opacity", 0.5).style("fill", function(d, i){return color(regiones.indexOf(d.properties.NOM_REG))})
-      .append("title").text(function(d){return d.properties.Details});
-    //showGraph();
-  });
+  
 
 });
 
-
+})
 function showGraph(data){
   chart1.selectAll("rect").remove();
   chart1.selectAll("text").remove();

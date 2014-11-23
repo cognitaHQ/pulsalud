@@ -1,1 +1,1 @@
-select i.name, SUM(e.declaredThisYear), e.year from eno as e , illness as i, services as s, regions as r where e.illnessId = i.id and e.regionId = s.name and s.parentRegion = r.id and r.id = 13 and e.year=2013 and e.week=52 order by e.illnessId, e.week;
+select i.name, (e.accumulatedThisYear), e.year from eno as e , illness as i, services as s, regions as r where e.illnessId = i.id and e.regionId = s.name and s.parentRegion = r.id and r.id = {{args[0]}} and e.week=52  order by e.illnessId, e.year;
