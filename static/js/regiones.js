@@ -6,34 +6,59 @@ var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 var title = svg.append("text").attr("x", 100).attr("y", 50).attr("class", "title");
-var chart1 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(300,100)");
+var chart1 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(100,100)");
 var chart2 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(100,400)");
 var g = svg.append("g");
 var color = d3.scale.category20c();//d3.scale.linear().domain([0,15]).range(['steelblue', 'orangered']);
 var regiones = [];
-var x = d3.scale.linear().range([0, 200]);
-var y = d3.scale.linear().range([30, 0]);
+var x = d3.scale.linear().range([0, 200]).domain([2000,2015]);
+var y = d3.scale.linear().range([10, 0]).domain([0,200]);
 
- function sparkline(myG, data, line, key, offset) {
 
-  x.domain([2000,2015]);
-  y.domain([0,200]);
+ function sparkline(myG, data, line, key, offset, offsetY) {
+                            console.log("offsetY!!!", offsetY);
+
+  myG.attr("transform", "translate(100,"+offsetY+")");
   myG.append("text").attr("class", "chart1-text").text(key).attr("transform", "translate(0,"+(offset+20)+")");
   myG
     .append('path')
     .datum(data)
-    .attr('class', 'sparkline').transition()
-    .attr('d', line).duration(400).attr("transform", "translate(200,"+offset+")");
+    .attr('class', 'sparkline').attr("transform", "translate(250,"+(offset )+")").transition()
+     .attr('d', line(data[0]))
+      .transition()
+        .duration(1000)
+        .attrTween('d', pathTween);
+
+    function pathTween() {
+        var interpolate = d3.scale.quantile()
+                .domain([0,1])
+                .range(d3.range(1, data.length + 1));
+        return function(t) {
+            return line(data.slice(0, interpolate(t)));
+        };
+    }
+
   myG.append('circle')
      .attr('class', 'sparkcircle')
      .attr('cx', x(data[data.length-1].year))
      .attr('cy', y(data[data.length-1].total))
-     .attr('r', 1.5).attr("transform", "translate(200,"+offset+")");
+     .transition().attr('r', 0).duration(1000)
+     .attr("transform", "translate(250,"+(offset-10)+")")
+     .transition().attr('r', 1.5).duration(400);
+
+  myG.append('text')
+     .attr('class', 'sparktext')
+     .attr('x', x(data[data.length-1].year))
+     .attr('y', y(data[data.length-1].total))
+     .attr("transform", "translate(260,"+(offset-10)+")")
+     .transition().duration(1000)
+     .transition().text(data[data.length-1].total).duration(400);
+
 }
 
 
 d3.json("/js/regiones.json", function(error, chile) {
-  var projection = d3.geo.mercator().scale(1200).translate([width*2 , -350]);
+  var projection = d3.geo.mercator().scale(1200).translate([width*2.4 , -350]);
   var path = d3.geo.path().projection(projection);
 
   g.selectAll(".regiones")
@@ -44,33 +69,36 @@ d3.json("/js/regiones.json", function(error, chile) {
       .attr("d", path).style("stroke", "black").style("stroke-width", "0.5px").style("fill-opacity", 0.5).style("fill", function(d, i){return color(regiones.indexOf(d.properties.NOM_REG))})
       .append("title").text(function(d){return d.properties.Details});
   d3.selectAll(".region").on("mouseover", function(){
-    var region = (d3.select(this).attr("id"));
-    console.log(region);
-    d3.csv("/hola/"+region, function(data){
-      console.log(data);
-      //showGraph(region, data);
-      previous = null;
-      timelines = {};
-      data.forEach(function(item, i){
-        console.log(item);
-        if(previous != item.illness){
-          timelines[item.illness] = [];
-          previous = item.illness;
-        }
-        timelines[item.illness].push({year: item.year, total: item.total});
-      });
-      counter = 0;
-      for (var key in timelines) {
-        if (timelines.hasOwnProperty(key)) {
-          t = timelines[key];
-          var line = d3.svg.line()
-          .x(function(d) { return x(d.year); })
-          .y(function(d) { return y(d.total); });
-          sparkline(chart1,t, line, key, counter++*20);
-        }
-      }
-    });
-});
+                          d3.select(this).classed("selectedRegion", true);
+                          var region = (d3.select(this).attr("id"));
+                          var offsetY = d3.event.pageY - 100;
+                          d3.csv("/hola/"+region, function(data){
+                            //showGraph(region, data);
+                            previous = null;
+                            timelines = {};
+                            data.forEach(function(item, i){
+                              if(previous != item.illness){
+                                timelines[item.illness] = [];
+                                previous = item.illness;
+                              }
+                              timelines[item.illness].push({year: item.year, total: item.total});
+                            });
+                            counter = 0;
+                            chart1.selectAll("text").remove();
+                            chart1.selectAll("path").remove();
+                            chart1.selectAll("circle").remove();
+
+                            for (var key in timelines) {
+                              if (timelines.hasOwnProperty(key)) {
+                                t = timelines[key];
+                                var line = d3.svg.line()
+                                .x(function(d) { return x(d.year); })
+                                .y(function(d) { return y(d.total); });
+                                sparkline(chart1,t, line, key, (counter++*25 - 50), offsetY);
+                              }
+                            }
+                          });
+                    });
 
 });
 

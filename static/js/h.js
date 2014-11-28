@@ -9,6 +9,20 @@ var title = svg.append("text").attr("x", 100).attr("y", 50).attr("class", "title
 var chart1 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(100,100)");
 var chart2 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(100,400)");
 var g = svg.append("g");
+
+function zoomed() {
+  g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  g.select(".region").style("stroke-width", 1.5 / d3.event.scale + "px");
+//  features.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
+}
+
+var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+g.call(zoom);
 var mini = svg.append("g").attr("transform","translate(2400 0)").attr("width", 500).attr("height", 500);
 var color = function(i){
   c = ["#000", "#d7191c", "#fdae61", "#ffffbf", "#abdda4", "#2b83ba" ];
@@ -16,6 +30,7 @@ var color = function(i){
   return c[i];
 };//d3.scale.category20c();//d3.scale.linear().domain([0,15]).range(['steelblue', 'orangered']);
 var regiones = [];
+
 
 d3.tsv("/dyh.csv", function(error, diabetes){
 
