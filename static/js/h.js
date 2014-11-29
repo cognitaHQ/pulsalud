@@ -1,13 +1,17 @@
-var width = 960,
-    height = 2300,
+var width = (window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth||800),
+    height = 1200,
     colorTransitionTime = 400;
-
+var proportionMap = 0.4,
+    proportionDetails = 0.4;
 var svg = d3.select("body").append("svg")
-    .attr("width", width)
+    .attr("width", width*0.4)
     .attr("height", height);
-var title = svg.append("text").attr("x", 100).attr("y", 50).attr("class", "title");
-var chart1 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(100,100)");
-var chart2 = svg.append("g").attr("width", 120).attr("height", 200).attr("transform", "translate(100,400)");
+var details = d3.select("body").append("svg")
+    .attr("width", width*0.4)
+    .attr("height", height)
+    .attr("id", "details");
+var title = details.append("text").attr("x", 10).attr("y", 50).attr("class", "title");
+var graphs = details.append("g");
 var g = svg.append("g");
 
 function zoomed() {
@@ -19,13 +23,13 @@ function zoomed() {
 var zoom = d3.behavior.zoom()
     .translate([0, 0])
     .scale(1)
-    .scaleExtent([1, 8])
+    .scaleExtent([1, 80])
     .on("zoom", zoomed);
 
-g.call(zoom);
-var mini = svg.append("g").attr("transform","translate(2400 0)").attr("width", 500).attr("height", 500);
+svg.call(zoom);
+
 var color = function(i){
-  c = ["#000", "#d7191c", "#fdae61", "#ffffbf", "#abdda4", "#2b83ba" ];
+  c = ["#000", "#d7191c", "orangered", "gold", "#abdda4", "#2b83ba" ];
   //console.log(i)
   return c[i];
 };//d3.scale.category20c();//d3.scale.linear().domain([0,15]).range(['steelblue', 'orangered']);
@@ -36,83 +40,64 @@ d3.tsv("/dyh.csv", function(error, diabetes){
 
 var colorComunas = {}
 diabetes.forEach(function(item){
-  colorComunas[parseInt(item.codigo)] = parseInt(item.classh);
+  colorComunas[parseInt(item.codigo)] = {val1h: item.val1h, cls: parseInt(item.classh)};
 });
 d3.json("/js/comunas.json", function(error, chile) {
-  var projection = d3.geo.mercator().scale(1200).translate([width*2 , -350]);
+  var projection = d3.geo.mercator().scale(width).translate([width*1.4 , -350]);
   var path = d3.geo.path().projection(projection);
 
   g.selectAll(".comunas")
      .data(topojson.feature(chile, chile.objects.comunas).features).enter().append("path")
-      .attr("class", "region")
-      .attr("id", function(d){return d.properties.id})      
+      .attr("class", "comuna").style("opacity", 0.5)
+      .attr("id", function(d){return d.properties.COD_COMUNA})
+      .attr("data-name", function(d){return d.properties.NOM_COM})
       .attr("data-region", function(d){if(regiones.indexOf(d.properties.NOM_REG) < 0){regiones.push(d.properties.NOM_REG)} return d.properties.NOM_REG})
-      .attr("d", path).style("stroke", "black").style("stroke-width", "0.5px").style("fill-opacity", 0.5)
+      .attr("d", path)
       .style("fill", function(d, i){
                 var c = parseInt(d.properties.COD_COMUNA);
                 if(colorComunas[c] == undefined){
-                  console.log(c)
+                  console.log(c);
+                  return "#000";
                 }
-                return color(colorComunas[d.properties.COD_COMUNA])
+                return color(colorComunas[d.properties.COD_COMUNA].cls)
               })
+      .on("mouseover", function(d){
+        var id = d3.select(this).attr("id");
+        d3.select(this).style("opacity", 1).style("stroke", "#000");
+        var maxBarWidth = (width*proportionDetails - 150);
+        title.text(d3.select(this).attr("data-name"));
+        graphs.append("text").attr("x", 10)
+                             .attr("y", 95)
+                             .text("Hipertensión");
+        graphs.append("rect").attr("x", 100)
+                             .attr("y", 80)
+                             .attr("height", 20)
+                             .attr("width", 0)
+                             .attr("class", "bar")
+                             .style("fill", color(colorComunas[id].cls))
+                             .transition()
+                             .attr("width", maxBarWidth*colorComunas[id].val1h)
+                             .duration(800);
+        graphs.append("text").attr("x", maxBarWidth*colorComunas[id].val1h+120)
+                             .attr("y", 95)
+                             .style("opacity", 0)
+                             .transition()
+                             .text(colorComunas[id].val1h)
+                             .style("opacity", 1)
+                             .duration(1000);
+      })
+      .on("mouseout", function(d){
+        d3.select(this).style("opacity", 0.5);
+        console.log(d3.select(this).attr("id"));
+        title.text("");
+        graphs.selectAll("rect").remove();
+        graphs.selectAll("text").remove();
+
+      })
+
       .append("title").text(function(d){return d.properties.Details});
-  
+
 
 });
 
 })
-function showGraph(data){
-  chart1.selectAll("rect").remove();
-  chart1.selectAll("text").remove();
-  chart2.selectAll("rect").remove();
-  chart2.selectAll("text").remove();
-  title.text(data.properties.Region);
-  g.selectAll("path").transition().style("fill-opacity", 0.5).duration(colorTransitionTime);
-  d3.select(this).transition().style("fill-opacity", 1).duration(colorTransitionTime);
-  arr = [];
-  for(var i=0; i<7; i++){
-    arr[i] = 100*Math.random();
-  }
-  max = d3.max(arr);
-  var barWidth = 20, barHeight = 300;
-  chart1.selectAll("rect").data(arr).enter()
-       .append("rect").style("fill", "orangered").style("fill-opacity", 0.6).style("stroke", "white")
-       .attr("x", 2).attr("y", function(d, i){return i*barWidth})
-       .attr("width", 0)
-        .attr("height", barWidth)
-       .transition()
-        .attr("width", function(d){return barHeight*(d/max)})
-       .duration(1000);
-  chart1.selectAll("text").data(arr).enter()
-      .append("text").attr("class", "chart1-text")
-      .attr("x", -60)
-      .attr("y", function(d, i){return barWidth/2+3+i*barWidth})
-      .text(function(d, i){return "Variable "+i})
-  chart1.selectAll("text").data(arr).enter()
-      .append("text")
-      .attr("x", function(d){return barHeight*(d/max)})
-      .attr("y", function(d, i){return barWidth/2+i*barWidth})
-      .text(function(d, i){return "ASDASD"})
-  for(var i=0; i<10; i++){
-    arr[i] = 100*Math.random();
-  }
- chart2.selectAll("rect").data(arr).enter()
-       .append("rect").style("fill", "steelblue").style("fill-opacity", 0.6).style("stroke", "white")
-       .attr("x", 2).attr("y", function(d, i){return i*barWidth})
-       .attr("width", 0)
-        .attr("height", barWidth)
-       .transition()
-        .attr("width", function(d){return barHeight*(d/max)})
-       .duration(1000);
-  chart2.selectAll("text").data(arr).enter()
-      .append("text").attr("class", "chart1-text")
-      .attr("x", -60)
-      .attr("y", function(d, i){return barWidth/2+3+i*barWidth})
-      .text(function(d, i){return "Variable "+i})
-  chart2.selectAll("text").data(arr).enter()
-      .append("text")
-      .attr("x", function(d){return barHeight*(d/max)})
-      .attr("y", function(d, i){return barWidth/2+i*barWidth})
-      .text(function(d, i){return "ASDASD"})
-
-}
