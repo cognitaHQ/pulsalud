@@ -1,10 +1,10 @@
 var width = (window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth||800),
     height = 1200,
     colorTransitionTime = 400;
-var proportionMap = 0.4,
-    proportionDetails = 0.4;
-var svg = d3.select("body").append("svg")
-    .attr("width", width*0.4)
+var proportionMap = 0.3,
+    proportionDetails = 0.3;
+var svg = d3.select("#viz").append("svg")
+    .attr("width", width*proportionMap)
     .attr("height", height);
 var details = d3.select("body").append("svg")
     .attr("width", width*0.4)
@@ -43,7 +43,7 @@ diabetes.forEach(function(item){
   colorComunas[parseInt(item.codigo)] = {val1d: item.val1d, cls: parseInt(item.classd)};
 });
 d3.json("/js/comunas.json", function(error, chile) {
-  var projection = d3.geo.mercator().scale(width).translate([width*1.4 , -350]);
+  var projection = d3.geo.mercator().scale(width).translate([width*1.3 , -400]);
   var path = d3.geo.path().projection(projection);
 
   g.selectAll(".comunas")
@@ -97,7 +97,7 @@ d3.json("/js/comunas.json", function(error, chile) {
       })
 
       .append("title").text(function(d){return d.properties.Details});
-
+ 
 
 });
 
