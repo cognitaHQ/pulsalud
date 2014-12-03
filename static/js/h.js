@@ -7,7 +7,7 @@ var svg = d3.select("#viz").append("svg")
     .attr("width", width*0.4)
     .attr("height", height);
 
-var details = d3.select("body").append("svg")
+var details = d3.select("#details").append("svg")
     .attr("width", width*0.4)
     .attr("height", height)
     .attr("id", "details");
