@@ -40,8 +40,10 @@ var regiones = [];
 d3.tsv("/dyh.csv", function(error, diabetes){
 
 var colorComunas = {}
+var maxRatio = 0;
 diabetes.forEach(function(item){
-  colorComunas[parseInt(item.codigo)] = {val1h: item.val1h, cls: parseInt(item.classh)};
+  if(item.val1h/item.val2h > maxRatio){ maxRatio = item.val1h/item.val2h}
+  colorComunas[parseInt(item.codigo)] = {val1h: item.val1h, val2h: item.val2h, cls: parseInt(item.classh)};
 });
 d3.json("/js/comunas.json", function(error, chile) {
   var projection = d3.geo.mercator().scale(width).translate([width*1.3 , -400]);
@@ -65,7 +67,7 @@ d3.json("/js/comunas.json", function(error, chile) {
       .on("mouseover", function(d){
         var id = d3.select(this).attr("id");
         d3.select(this).style("opacity", 1).style("stroke", "#000");
-        var maxBarWidth = (width*proportionDetails - 150);
+        var maxBarWidth = (width*proportionDetails +200);
         title.text(d3.select(this).attr("data-name"));
         graphs.append("text").attr("x", 10)
                              .attr("y", 95)
@@ -77,15 +79,43 @@ d3.json("/js/comunas.json", function(error, chile) {
                              .attr("class", "bar")
                              .style("fill", color(colorComunas[id].cls))
                              .transition()
-                             .attr("width", maxBarWidth*colorComunas[id].val1h)
+                             .attr("width", function(d){ if(isNaN(colorComunas[id].val1h)/parseFloat(colorComunas[id].val2h)){return 0} return maxBarWidth*(parseFloat(colorComunas[id].val1h)/parseFloat(colorComunas[id].val2h))/maxRatio})
                              .duration(800);
-        graphs.append("text").attr("x", maxBarWidth*colorComunas[id].val1h+120)
+        graphs.append("text").attr("x", function(d){
+                                                if(isNaN(colorComunas[id].val1h/colorComunas[id].val2h)){
+                                                  return 100;
+                                                }
+                                                return 100+maxBarWidth*(parseFloat(colorComunas[id].val1h)/parseFloat(colorComunas[id].val2h))/maxRatio
+                              })
                              .attr("y", 95)
                              .style("opacity", 0)
                              .transition()
-                             .text(colorComunas[id].val1h)
+                             .text(function(d){
+                                                if(isNaN(colorComunas[id].val1h/colorComunas[id].val2h)){
+                                                  return "No data";
+                                                }
+                                                return parseInt(100*colorComunas[id].val1h/colorComunas[id].val2h)+"%"
+                                              })
                              .style("opacity", 1)
                              .duration(1000);
+
+        graphs.append("line").attr("x1", 100+maxBarWidth/maxRatio)
+                            .attr("y1", 70)
+                            .attr("x2", 100+maxBarWidth/maxRatio)
+                            .attr("y2", 70)
+                            .style("stroke", "#ccc")
+                            .transition()
+                            .attr("y2", 110)
+                            .duration(1000)
+                            ;
+        graphs.append("text").attr("x", 85+maxBarWidth/maxRatio)
+                             .attr("y", 130)
+                             .style("fill", "grey")
+                             .style("opacity", 0)
+                              .transition()
+                              .text("100%")
+                              .style("opacity", 1)
+                              .duration(1000);
       })
       .on("mouseout", function(d){
         d3.select(this).style("opacity", 0.5);
@@ -93,6 +123,7 @@ d3.json("/js/comunas.json", function(error, chile) {
         title.text("");
         graphs.selectAll("rect").remove();
         graphs.selectAll("text").remove();
+        graphs.selectAll("line").remove();
 
       })
 

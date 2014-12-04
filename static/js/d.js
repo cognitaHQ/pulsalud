@@ -39,8 +39,10 @@ var regiones = [];
 d3.tsv("/dyh.csv", function(error, diabetes){
 
 var colorComunas = {}
+var maxRatio = 0;
 diabetes.forEach(function(item){
-  colorComunas[parseInt(item.codigo)] = {val1d: item.val1d, cls: parseInt(item.classd)};
+  if(item.val1d/item.val2d > maxRatio){ maxRatio = item.val1d/item.val2d}
+  colorComunas[parseInt(item.codigo)] = {val1d: item.val1d, val2d: item.val2d, cls: parseInt(item.classd)};
 });
 d3.json("/js/comunas.json", function(error, chile) {
   var projection = d3.geo.mercator().scale(width).translate([width*1.3 , -400]);
@@ -77,15 +79,42 @@ d3.json("/js/comunas.json", function(error, chile) {
                              .attr("class", "bar")
                              .style("fill", color(colorComunas[id].cls))
                              .transition()
-                             .attr("width", maxBarWidth*colorComunas[id].val1d)
+                             .attr("width", function(d){ if(isNaN(colorComunas[id].val1d)/parseFloat(colorComunas[id].val2d)){return 0} return maxBarWidth*(parseFloat(colorComunas[id].val1d)/parseFloat(colorComunas[id].val2d))/maxRatio})
                              .duration(800);
-        graphs.append("text").attr("x", maxBarWidth*colorComunas[id].val1d+120)
+        graphs.append("text").attr("x", function(d){
+                                                if(isNaN(colorComunas[id].val1d/colorComunas[id].val2d)){
+                                                  return 100;
+                                                }
+                                                return 100+maxBarWidth*(parseFloat(colorComunas[id].val1d)/parseFloat(colorComunas[id].val2d))/maxRatio
+                              })
                              .attr("y", 95)
                              .style("opacity", 0)
                              .transition()
-                             .text(colorComunas[id].val1d)
+                             .text(function(d){
+                                                if(isNaN(colorComunas[id].val1d/colorComunas[id].val2d)){
+                                                  return "No data";
+                                                }
+                                                return (100*colorComunas[id].val1d/colorComunas[id].val2d)+"%"
+                                              })
                              .style("opacity", 1)
                              .duration(1000);
+        graphs.append("line").attr("x1", 100+maxBarWidth/maxRatio)
+                            .attr("y1", 70)
+                            .attr("x2", 100+maxBarWidth/maxRatio)
+                            .attr("y2", 70)
+                            .style("stroke", "#ccc")
+                            .transition()
+                            .attr("y2", 110)
+                            .duration(1000)
+                            ;
+        graphs.append("text").attr("x", 85+maxBarWidth/maxRatio)
+                             .attr("y", 130)
+                             .style("fill", "grey")
+                             .style("opacity", 0)
+                              .transition()
+                              .text("100%")
+                              .style("opacity", 1)
+                              .duration(1000);
       })
       .on("mouseout", function(d){
         d3.select(this).style("opacity", 0.5);
@@ -93,6 +122,7 @@ d3.json("/js/comunas.json", function(error, chile) {
         title.text("");
         graphs.selectAll("rect").remove();
         graphs.selectAll("text").remove();
+        graphs.selectAll("line").remove();
 
       })
 
