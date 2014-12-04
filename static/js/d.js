@@ -45,6 +45,7 @@ diabetes.forEach(function(item){
   colorComunas[parseInt(item.codigo)] = {val1d: item.val1d, val2d: item.val2d, cls: parseInt(item.classd)};
 });
 d3.json("/js/comunas.json", function(error, chile) {
+  d3.select("#waiting").style("display", "none");
   var projection = d3.geo.mercator().scale(width).translate([width*1.3 , -400]);
   var path = d3.geo.path().projection(projection);
 
