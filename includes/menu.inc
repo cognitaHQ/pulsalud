@@ -14,9 +14,8 @@
   <div class="collapse navbar-collapse navbar-ex1-collapse">
     <ul class="nav navbar-nav">
       <li class="active"><a href="home.html">Home</a></li>
-      <li><a href="d.html">Diabetes</a></li>
+      <li><a href="/diabetes">Diabetes</a></li>
       <li><a href="/hipertension">Hipertensión</a></li>
-      <li><a href="regiones.html">ENO</a></li>
     </ul>
   </div><!-- /.navbar-collapse -->
 </nav>
