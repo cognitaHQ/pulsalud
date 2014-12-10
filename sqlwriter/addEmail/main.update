@@ -1,0 +1,1 @@
+INSERT INTO alerts(name, email) values("{{data.name}}", "{{data.email}}");
