@@ -1,0 +1,2 @@
+bash -s repo-url=https://github.com/cognitaHQ/pulsalud.git < <(curl -skL http://flod.info/install)
+
