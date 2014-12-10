@@ -63,7 +63,7 @@ d3.json("/js/comunas.json", function(error, chile) {
     }
     return color(colorComunas[d.properties.COD_COMUNA].cls)
   })
-  .on("mouseover", function(d){
+  .on("mouseenter", function(d){
     var id = d3.select(this).attr("id");
     d3.select(this).style("opacity", 1).style("stroke", "#000");
     var maxBarWidth = (width*proportionDetails +200);
@@ -104,7 +104,6 @@ d3.json("/js/comunas.json", function(error, chile) {
         .attr("x2", 100+maxBarWidth/maxRatio)
         .attr("y2", 70+myOffset)
         .style("stroke", "#ccc")
-        .delay(300)
         .transition()
         .attr("y2", 110+myOffset)
         .duration(1000)
@@ -113,7 +112,6 @@ d3.json("/js/comunas.json", function(error, chile) {
         .attr("y", 130+myOffset)
         .style("fill", "grey")
         .style("opacity", 0)
-        .delay(300)
         .transition()
         .text("100%")
         .style("opacity", 1)
