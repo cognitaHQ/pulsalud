@@ -48,6 +48,7 @@ class SQLWriter:
 		currentDir = getcwd()
 		sqlWriterService = self.basedir + file
 		uri = req["url"]
+		myForm = req["request"].form
 		updatePath = "%s/" % sqlWriterService
 		templatePath = "%s/" % sqlWriterService
 		templateName =  self.mime.getExtension(req["request"].accept_mimetypes.best)
@@ -64,7 +65,7 @@ class SQLWriter:
 					if not filename.endswith(".update"):
 						continue
 					sqlQuery = self.env.get_template("%s/%s" % (root, filename))
-					renderedSqlQuery = sqlQuery.render(queries=queries, first=first, uri=uri, session=session, flod=self.flod, args=myPath)
+					renderedSqlQuery = sqlQuery.render(queries=queries, first=first, uri=uri, session=session, flod=self.flod, args=myPath, data=myForm)
 					if re.match("^\s*(insert|update|delete)", renderedSqlQuery, flags=re.IGNORECASE) is None:
 						return {"content": "Not a valid SQL INSERT/UPDATE/DELETE query", "status": 500}
 					renderedQueries.append({"query": renderedSqlQuery, "name": filename.replace(".query", "")})

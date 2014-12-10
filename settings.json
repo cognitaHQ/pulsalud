@@ -1,5 +1,5 @@
 {
- 	"modules": [ "SQLReader", "Static", "Services"],
+ 	"modules": [ "SQLReader", "SQLWriter","Static", "Services"],
  	"ns": {
  		"local": "http://localhost:10001/",
  		"origin": "http://localhost:10001//"
