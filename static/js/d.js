@@ -120,7 +120,7 @@ d3.json("/js/comunas.json", function(error, chile) {
         .duration(1000);
 
     });
-})
+}, 200)
   })
 .on("mouseout", function(d){
   d3.select(this).style("opacity", 0.5);
