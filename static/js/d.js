@@ -1,4 +1,5 @@
 (function(){
+  var timer = null;
   var width = (window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth||800),
   height = 1200,
   colorTransitionTime = 400;
@@ -58,20 +59,21 @@ d3.json("/js/comunas.json", function(error, chile) {
   .style("fill", function(d, i){
     var c = parseInt(d.properties.COD_COMUNA);
     if(colorComunas[c] == undefined){
-      console.log(c);
       return "#000";
     }
     return color(colorComunas[d.properties.COD_COMUNA].cls)
   })
-  .on("mouseenter", function(d){
-    var id = d3.select(this).attr("id");
-    d3.select(this).style("opacity", 1).style("stroke", "#000");
+  .on("mouseover", function(d){
+    var self = this;
+    clearTimeout(timer)
+    timer = setTimeout(function(){
+    var id = d3.select(self).attr("id");
+    d3.select(self).style("opacity", 1).style("stroke", "#000");
     var maxBarWidth = (width*proportionDetails +200);
-    title.text(d3.select(this).attr("data-name"));
+    title.text(d3.select(self).attr("data-name"));
     var myOffset = 0;
     d3.json("/getDiabetesComuna/"+id, function(dataComuna){
       dataComuna.data.forEach(function(item){
-        console.log(item);
         graphs.append("text").attr("x", 10)
         .attr("y", 95+myOffset)
         .text(item.year);
@@ -118,6 +120,7 @@ d3.json("/js/comunas.json", function(error, chile) {
         .duration(1000);
 
     });
+})
   })
 .on("mouseout", function(d){
   d3.select(this).style("opacity", 0.5);
