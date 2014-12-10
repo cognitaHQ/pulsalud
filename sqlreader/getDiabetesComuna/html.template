@@ -1,0 +1,7 @@
+{
+"data": [
+{%for row in queries.h%}
+{"year": {{row[0]}}, "val1": {{row[1]|default(0, true)}}, "val2": {{row[2]|default(0, true)}}, "val3": {{row[3]|default(0, true)}} }{%if not loop.last%},{%endif%}
+{%endfor%}
+]
+}

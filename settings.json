@@ -10,7 +10,7 @@
  		"dbpedia": "http://dbpedia.org/sparql"
  	},
  	"sqlserver": {
- 		"local": "sqlite:///components/enfermedades.db"
+ 		"local": "sqlite:///components/data.db"
  	},
  	"additionalModules": [ "components/customModules"],
  	"host": "0.0.0.0",

@@ -1,0 +1,1 @@
+select id, h1, h2, hClass from indicators where year = 2013;
