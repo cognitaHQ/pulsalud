@@ -64,6 +64,9 @@ d3.json("/js/comunas.json", function(error, chile) {
     return color(colorComunas[d.properties.COD_COMUNA].cls)
   })
   .on("mouseover", function(d){
+    graphs.selectAll("rect").remove();
+    graphs.selectAll("text").remove();
+    graphs.selectAll("line").remove();
     var self = this;
     clearTimeout(timer)
     timer = setTimeout(function(){
