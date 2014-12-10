@@ -1,4 +1,5 @@
 (function(){
+  var timer = null;
   var width = (window.innerWidth||document.documentElement.clientWidth||document.body.clientWidth||800),
   height = 1200,
   colorTransitionTime = 400;
@@ -58,66 +59,68 @@ d3.json("/js/comunas.json", function(error, chile) {
   .style("fill", function(d, i){
     var c = parseInt(d.properties.COD_COMUNA);
     if(colorComunas[c] == undefined){
-      console.log(c);
       return "#000";
     }
     return color(colorComunas[d.properties.COD_COMUNA].cls)
   })
   .on("mouseover", function(d){
-    var id = d3.select(this).attr("id");
-    d3.select(this).style("opacity", 1).style("stroke", "#000");
-    var maxBarWidth = (width*proportionDetails +200);
-    title.text(d3.select(this).attr("data-name"));
-    var myOffset = 0;
-    d3.json("/getHipertensionComuna/"+id, function(dataComuna){
-      dataComuna.data.forEach(function(item){
-        console.log(item);
-        graphs.append("text").attr("x", 10)
-        .attr("y", 95+myOffset)
-        .text(item.year);
-        graphs.append("rect").attr("x", 100)
-        .attr("y", 80+myOffset)
-        .attr("height", 20)
-        .attr("width", 0)
-        .attr("class", "bar")
-        .style("fill", color(colorComunas[id].cls))
-        .transition()
-        .attr("width", function(d){ return (item.val3 == 0)?0:maxBarWidth*(parseFloat(item.val1)/parseFloat(item.val2))/maxRatio})
-        .duration(800);
-        graphs.append("text").attr("x", function(d){
-          return (item.val3 == 0)?100:100+maxBarWidth*(parseFloat(item.val1)/parseFloat(item.val2))/maxRatio;
-        })
-        .attr("y", 95+myOffset)
-        .style("opacity", 0)
-        .transition()
-        .text(function(){
+    var self = this;
+    clearTimeout(timer)
+    timer = setTimeout(function(){
+      var id = d3.select(self).attr("id");
+      d3.select(self).style("opacity", 1).style("stroke", "#000");
+      var maxBarWidth = (width*proportionDetails +200);
+      title.text(d3.select(self).attr("data-name"));
+      var myOffset = 0;
+      d3.json("/getHipertensionComuna/"+id, function(dataComuna){
+        dataComuna.data.forEach(function(item){
+          graphs.append("text").attr("x", 10)
+          .attr("y", 95+myOffset)
+          .text(item.year);
+          graphs.append("rect").attr("x", 100)
+          .attr("y", 80+myOffset)
+          .attr("height", 20)
+          .attr("width", 0)
+          .attr("class", "bar")
+          .style("fill", color(colorComunas[id].cls))
+          .transition()
+          .attr("width", function(d){ return (item.val3 == 0)?0:maxBarWidth*(parseFloat(item.val1)/parseFloat(item.val2))/maxRatio})
+          .duration(800);
+          graphs.append("text").attr("x", function(d){
+            return (item.val3 == 0)?100:100+maxBarWidth*(parseFloat(item.val1)/parseFloat(item.val2))/maxRatio;
+          })
+          .attr("y", 95+myOffset)
+          .style("opacity", 0)
+          .transition()
+          .text(function(){
             return (item.val3 == 0)?"No data":parseInt(100*item.val1/item.val2)+"%";
-        })
-        .style("opacity", 1)
-        .duration(1000);
-       
-        myOffset += 50;
-      });
-      myOffset -= 50;
- graphs.append("line").attr("x1", 100+maxBarWidth/maxRatio)
-        .attr("y1", 70)
-        .attr("x2", 100+maxBarWidth/maxRatio)
-        .attr("y2", 70+myOffset)
-        .style("stroke", "#ccc")
-        .transition()
-        .attr("y2", 110+myOffset)
-        .duration(1000)
-        ;
-        graphs.append("text").attr("x", 85+maxBarWidth/maxRatio)
-        .attr("y", 130+myOffset)
-        .style("fill", "grey")
-        .style("opacity", 0)
-        .transition()
-        .text("100%")
-        .style("opacity", 1)
-        .duration(1000);
+          })
+          .style("opacity", 1)
+          .duration(1000);
 
-    });
+          myOffset += 50;
+        });
+myOffset -= 50;
+graphs.append("line").attr("x1", 100+maxBarWidth/maxRatio)
+.attr("y1", 70)
+.attr("x2", 100+maxBarWidth/maxRatio)
+.attr("y2", 70+myOffset)
+.style("stroke", "#ccc")
+.transition()
+.attr("y2", 110+myOffset)
+.duration(1000)
+;
+graphs.append("text").attr("x", 85+maxBarWidth/maxRatio)
+.attr("y", 130+myOffset)
+.style("fill", "grey")
+.style("opacity", 0)
+.transition()
+.text("100%")
+.style("opacity", 1)
+.duration(1000);
+
+});
+}, 200)
   })
 .on("mouseout", function(d){
   d3.select(this).style("opacity", 0.5);
