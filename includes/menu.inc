@@ -16,7 +16,7 @@
       <li><a href="/home">Home</a></li>
       <li><a href="/diabetes">Diabetes</a></li>
       <li><a href="/hipertension">Hipertensión</a></li>
-
+      <li><a href="/compara">Comparación de comunas</a></li>
     </ul>
     <ul class="nav navbar-nav navbar-right">
         <li><button data-toggle="modal" class="btn btn-sm" data-target="#myModal">Recibe alertas de nuevas actualizaciones</button></li>
