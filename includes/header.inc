@@ -9,7 +9,14 @@
 svg{
     font-family: sans-serif;
 }
-
+footer{
+  position: fixed;
+  bottom: 0px;
+  text-align: center;
+  background: black;
+  color: white;
+  width:100%;
+}
 .selected{
   opacity: 1;
 }

@@ -1,0 +1,1 @@
+select id, d1, d2, dClass from indicators where year = 2013;

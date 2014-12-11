@@ -1,0 +1,44 @@
+{%extends "components/includes/base.html"%}
+{%block content%}
+
+<div class="container">
+  <div class="row">
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+      <select id="comuna1" class="comuna form-control"></select>
+      <select id="comuna2" class="comuna form-control"></select>
+      <br/><button type="button" id="comparar" class="btn btn-primary" disabled>Comparar!</button>
+      <div id="waiting" style="text-align:center;margin:auto;">
+        <img src="waiting.gif" alt="wait"/>
+        <p>Cargando datos...</p>
+      </div>
+      <p>
+      <h3>Comparación de comunas</h3>
+      Aquí se pueden comparar los índices de dos comunas diferentes, en base a los datos que han sido recolectados hasta ahora. Es importante destacar que no todas las comunas tienen datos disponibles.</p>
+    </div>
+    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+      <table class="table table-bordered table-hover">
+        <tbody>
+          <tr>
+            <td><h3>Diabetes</h3></td><td id="tddiabetes"></td>
+          </tr>
+          <tr>
+            <td><h3>Hipertension</h3></td><td id="tdhipertension"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+var data = [
+{%for row in queries.h%}
+{codigo: {{row[0]}}, val1h: {{row[1]|default(0, true)}}, val2h: {{row[2]|default(0, true)}}, classh: {{row[3]|default(0, true)}} }{%if not loop.last%},{%endif%}
+{%endfor%}
+];
+</script>
+<script src="/js/d3.v3.min.js"></script>
+<script src="/js/topojson.v1.min.js"></script>
+<script src="/js/compara.js"></script>
+
+
+{%endblock%}
