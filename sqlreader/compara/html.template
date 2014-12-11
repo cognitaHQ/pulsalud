@@ -11,8 +11,8 @@
         <img src="waiting.gif" alt="wait"/>
         <p>Cargando datos...</p>
       </div>
-      <p>
       <h3>Comparación de comunas</h3>
+      <p style="text-align:justify">
       Aquí se pueden comparar los índices de dos comunas diferentes, en base a los datos que han sido recolectados hasta ahora. Es importante destacar que no todas las comunas tienen datos disponibles.</p>
     </div>
     <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
